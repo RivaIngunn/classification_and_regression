@@ -42,6 +42,7 @@ class stochastic_descent:
         self.beta = beta # Store final set of coefficients and intercept
         self.intercept_ = beta[0] # Store intercept
         self.coef_ = beta[1:] # Store coefficients
+        print("hey")
 
 
 X = np.array([
