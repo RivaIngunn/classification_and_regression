@@ -1,19 +1,34 @@
 import numpy as np
+import matplotlib.pyplot as plt
 from linear_regression import Regression
+np.random.seed(42)
 
 class stochastic_descent:
     def __init__(self):
-        self.epoch = 2
+        self.beta = None        # Complete set of coefficients with intercept
+        self.intercept_ = None  # Array of intercept
+        self.coef_ = None       # Coefficients without intercept
 
     def step_length(self, t, t0, t1):
         return t0/(t+t1)
 
-    def fit(self, X, y):
-        n = X.shape[0]
-        feats  = X.shape[1]
+    def create_mini_batches(self, X, y, n_batches):
+        # Shuffle data
+        indices = np.arange(X.shape[0])
+        np.random.shuffle(indices)
+        X_new = X[indices]
+        y_new = y[indices]
+
+        # Split into minibatches
+        X_new = np.array_split(X_new, n_batches)
+        y_new = np.array_split(y_new, n_batches)
+
+        return X_new, y_new
+
+    def fit(self, X, y, batch_size):
+        n, feats = X.shape
         batch_size = 5
         n_batch = int(n/batch_size)
-        print(n_batch)
         n_epochs = 500
         t0 = 1.0
         t1 = 10
@@ -23,37 +38,54 @@ class stochastic_descent:
         learning_rate = t0/t1
         j = 0
 
+        # Break data into mini batches
+        X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
+
         for epoch in range(1,n_epochs+1):
             # Perform Gradient Descent on minibatches
             for i in range(n_batch):
-                # Select random index representing batch
-                # and then select corresponding regions of X and y
-                random_index = np.random.randint(n_batch)
-                Xi = X[random_index:random_index+1]
-                yi = y[random_index:random_index+1]
+                # Fetch batches and calculate gradient
+                Xi = X_batches[i]
+                yi = y_batches[i]
+                gradients = -2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
 
-                gradients = 2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
-
+                # Calculate step length
                 t = epoch*n_batch + i
                 learning_rate = self.step_length(t, t0, t1)
                 beta = beta - learning_rate*gradients
+                print(beta, "Epoch = ", epoch)
+                # Update index
                 j += 1
-                print(gradients)
-        self.beta = beta # Store final set of coefficients and intercept
-        self.intercept_ = beta[0] # Store intercept
-        self.coef_ = beta[1:] # Store coefficients
-        print("hey")
 
+        #print(beta)
+        # Store final set of coefficients and intercept
+        self.beta = beta
+        self.intercept_ = beta[0]
+        self.coef_ = beta[1:]
 
-X = np.array([
-[1,2,3,4,5,6],
-[4,5,6,7,8,9]
-])
-y = np.array([3,4])
+if __name__ == "__main__":
+    reg = Regression()
+    reg.dataset_franke(400)
+    maxdeg = 10
+    degrees = np.linspace(1,maxdeg,maxdeg, dtype = 'int')
 
-reg = Regression()
-reg.dataset_franke(400)
-reg.design_matrix(8)
+    train_error = np.zeros(maxdeg)
+    test_error  = np.zeros(maxdeg)
 
-SDG = stochastic_descent()
-SDG.fit(reg.X,reg.f)
+    batch_size = 5
+    for i, deg in enumerate(degrees):
+        reg.design_matrix(deg)
+        reg.split(reg.X, reg.f)
+
+        SDG = stochastic_descent()
+        SDG.fit(reg.X_train, reg.f_train, batch_size)
+
+        z_tilde = reg.X_train @ SDG.beta
+        z_pred  = reg.X_test  @ SDG.beta
+
+        train_error[i] = np.mean( (z_tilde**2 - reg.f_train)**2 )
+        test_error[i]  = np.mean( (z_pred**2  - reg.f_test )**2 )
+
+plt.plot(degrees, train_error)
+plt.plot(degrees, test_error)
+plt.show()
