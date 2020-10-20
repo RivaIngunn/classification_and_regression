@@ -16,6 +16,7 @@ class stochastic_descent:
         # Shuffle data
         indices = np.arange(X.shape[0])
         np.random.shuffle(indices)
+        
         X_new = X[indices]
         y_new = y[indices]
 
@@ -30,32 +31,32 @@ class stochastic_descent:
         batch_size = 5
         n_batch = int(n/batch_size)
         n_epochs = 500
-        t0 = 1.0
+        t0 = 1
         t1 = 10
 
         beta = np.random.randn(feats)
 
         learning_rate = t0/t1
-        j = 0
 
-        # Break data into mini batches
-        X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
 
         for epoch in range(1,n_epochs+1):
             # Perform Gradient Descent on minibatches
             for i in range(n_batch):
+                # Break data into mini batches
+                X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
+                batch_index = np.random.randint(n_batch)
                 # Fetch batches and calculate gradient
-                Xi = X_batches[i]
-                yi = y_batches[i]
-                gradients = -2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
-
+                Xi = X_batches[batch_index]
+                yi = y_batches[batch_index]
+                gradients = 2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
+                
+                print ('k', batch_index)
                 # Calculate step length
                 t = epoch*n_batch + i
                 learning_rate = self.step_length(t, t0, t1)
                 beta = beta - learning_rate*gradients
-                print(beta, "Epoch = ", epoch)
-                # Update index
-                j += 1
+                # print(beta, "Epoch = ", epoch)
+
 
         #print(beta)
         # Store final set of coefficients and intercept
@@ -83,9 +84,12 @@ if __name__ == "__main__":
         z_tilde = reg.X_train @ SDG.beta
         z_pred  = reg.X_test  @ SDG.beta
 
-        train_error[i] = np.mean( (z_tilde**2 - reg.f_train)**2 )
-        test_error[i]  = np.mean( (z_pred**2  - reg.f_test )**2 )
+        train_error[i] = np.mean( (z_tilde - reg.f_train)**2 )
+        test_error[i]  = np.mean( (z_pred  - reg.f_test )**2 )
 
-plt.plot(degrees, train_error)
-plt.plot(degrees, test_error)
+plt.plot(degrees, train_error, label = 'train_error')
+plt.plot(degrees, test_error, label = 'test_error')
+plt.xlabel('deg')
+plt.ylabel('Error')
+plt.legend()
 plt.show()
