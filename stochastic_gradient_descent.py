@@ -9,7 +9,7 @@ class stochastic_descent:
         self.intercept_ = None  # Array of intercept
         self.coef_ = None       # Coefficients without intercept
 
-    def step_length(self, t, t0, t1):
+    def learning_schedule(self, t, t0, t1):
         return t0/(t+t1)
 
     def create_mini_batches(self, X, y, n_batches):
@@ -30,32 +30,37 @@ class stochastic_descent:
         batch_size = 5
         n_batch = int(n/batch_size)
         n_epochs = 500
-        t0 = 1.0
+        t0 = 1
         t1 = 10
 
         beta = np.random.randn(feats)
 
         learning_rate = t0/t1
-        j = 0
 
-        # Break data into mini batches
-        X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
+        errors = np.zeros(n_epochs)
+        epochs = np.linspace(1, n_epochs,n_epochs)
 
         for epoch in range(1,n_epochs+1):
             # Perform Gradient Descent on minibatches
             for i in range(n_batch):
+                # Break data into mini batches
+                X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
+
                 # Fetch batches and calculate gradient
-                Xi = X_batches[i]
-                yi = y_batches[i]
-                gradients = -2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
+                batch_index = np.random.randint(n_batch)
+                Xi = X_batches[n_batch]
+                yi = y_batches[n_batch]
+                gradients = 2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
 
                 # Calculate step length
                 t = epoch*n_batch + i
-                learning_rate = self.step_length(t, t0, t1)
+                learning_rate = self.learning_schedule(t, t0, t1)
                 beta = beta - learning_rate*gradients
-                print(beta, "Epoch = ", epoch)
-                # Update index
-                j += 1
+
+            errors[epoch-1] = np.mean((X @ beta - y)**2)
+
+        plt.plot(epochs, errors)
+        plt.show()
 
         #print(beta)
         # Store final set of coefficients and intercept
@@ -83,8 +88,8 @@ if __name__ == "__main__":
         z_tilde = reg.X_train @ SDG.beta
         z_pred  = reg.X_test  @ SDG.beta
 
-        train_error[i] = np.mean( (z_tilde**2 - reg.f_train)**2 )
-        test_error[i]  = np.mean( (z_pred**2  - reg.f_test )**2 )
+        train_error[i] = np.mean( (z_tilde - reg.f_train)**2 )
+        test_error[i]  = np.mean( (z_pred  - reg.f_test )**2 )
 
 plt.plot(degrees, train_error)
 plt.plot(degrees, test_error)
