@@ -16,6 +16,7 @@ class stochastic_descent:
         # Shuffle data
         indices = np.arange(X.shape[0])
         np.random.shuffle(indices)
+
         X_new = X[indices]
         y_new = y[indices]
 
@@ -91,6 +92,9 @@ if __name__ == "__main__":
         train_error[i] = np.mean( (z_tilde - reg.f_train)**2 )
         test_error[i]  = np.mean( (z_pred  - reg.f_test )**2 )
 
-plt.plot(degrees, train_error)
-plt.plot(degrees, test_error)
+plt.plot(degrees, train_error, label = 'train_error')
+plt.plot(degrees, test_error, label = 'test_error')
+plt.xlabel('deg')
+plt.ylabel('Error')
+plt.legend()
 plt.show()
