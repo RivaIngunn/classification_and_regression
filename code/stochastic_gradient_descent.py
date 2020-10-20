@@ -49,8 +49,8 @@ class stochastic_descent:
 
                 # Fetch batches and calculate gradient
                 batch_index = np.random.randint(n_batch)
-                Xi = X_batches[n_batch]
-                yi = y_batches[n_batch]
+                Xi = X_batches[batch_index]
+                yi = y_batches[batch_index]
                 gradients = 2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
 
                 # Calculate step length
