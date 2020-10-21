@@ -31,7 +31,7 @@ class stochastic_descent:
         batch_size = 5
         n_batch = int(n/batch_size)
         n_epochs = 500
-        t0 = 1
+        t0 = 10
         t1 = 10
 
         beta = np.random.randn(feats)
