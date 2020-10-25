@@ -1,7 +1,10 @@
-import numpy as np
+import autograd.numpy as np
+from autograd import grad
 import matplotlib.pyplot as plt
 from linear_regression import Regression
-np.random.seed(42)
+from sklearn.linear_model import SGDRegressor
+
+np.random.seed(45)
 
 class stochastic_descent:
     def __init__(self):
@@ -26,42 +29,47 @@ class stochastic_descent:
 
         return X_new, y_new
 
-    def fit(self, X, y, batch_size):
+    def fit(self, X, y, batch_size, t0, t1, gamma, loss_func):
         n, feats = X.shape
-        batch_size = 5
         n_batch = int(n/batch_size)
-        n_epochs = 500
-        t0 = 10
-        t1 = 10
+        n_epochs = 100
 
+        # Setting up a starting point
         beta = np.random.randn(feats)
-
         learning_rate = t0/t1
+        v = 1
 
         errors = np.zeros(n_epochs)
         epochs = np.linspace(1, n_epochs,n_epochs)
 
+        # Break data into mini batches
+        X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
+
         for epoch in range(1,n_epochs+1):
             # Perform Gradient Descent on minibatches
             for i in range(n_batch):
-                # Break data into mini batches
-                X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
-
-                # Fetch batches and calculate gradient
+                # Fetch random batch and calculate gradient
                 batch_index = np.random.randint(n_batch)
                 Xi = X_batches[batch_index]
                 yi = y_batches[batch_index]
-                gradients = 2.0/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
+                gradients = 2/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
+
+                gradient_func = grad(loss_func, 1)
+                gradients_ = gradient_func(Xi, beta, yi)
 
                 # Calculate step length
                 t = epoch*n_batch + i
                 learning_rate = self.learning_schedule(t, t0, t1)
-                beta = beta - learning_rate*gradients
 
-            errors[epoch-1] = np.mean((X @ beta - y)**2)
+                v = gamma*v + learning_rate*gradient_func(Xi, beta - gamma*v, yi)
+                #print(v)
 
-        plt.plot(epochs, errors)
-        plt.show()
+                beta = beta - v#learning_rate*gradients_
+
+            #errors[epoch-1] = np.mean((X @ beta - y)**2)
+
+        #plt.plot(epochs, errors)
+        #plt.show()
 
         #print(beta)
         # Store final set of coefficients and intercept
@@ -70,31 +78,40 @@ class stochastic_descent:
         self.coef_ = beta[1:]
 
 if __name__ == "__main__":
+    def MSE(X, beta, y):
+        return np.mean(( X @ beta - y)**2)
     reg = Regression()
-    reg.dataset_franke(400)
-    maxdeg = 10
+    reg.dataset_franke(200)
+
+    batch_size = 32
+    t0 = np.logspace(-3,1,10)
+    gamma = 0.5
+
+    maxdeg = 2
     degrees = np.linspace(1,maxdeg,maxdeg, dtype = 'int')
 
-    train_error = np.zeros(maxdeg)
-    test_error  = np.zeros(maxdeg)
+    for deg in degrees:
+        error     = np.zeros(t0.shape)
+        error_kit = np.zeros(t0.shape)
 
-    batch_size = 5
-    for i, deg in enumerate(degrees):
-        reg.design_matrix(deg)
-        reg.split(reg.X, reg.f)
+        for i, t in enumerate(t0):
+            reg.design_matrix(deg)
+            reg.split(reg.X, reg.f)
 
-        SDG = stochastic_descent()
-        SDG.fit(reg.X_train, reg.f_train, batch_size)
+            SDG = stochastic_descent()
+            SDG.fit(reg.X_train, reg.f_train, batch_size, t, 10, gamma, loss_func = MSE)
 
-        z_tilde = reg.X_train @ SDG.beta
-        z_pred  = reg.X_test  @ SDG.beta
+            sgdreg = SGDRegressor(max_iter = 100, penalty=None, eta0=t/10)
+            sgdreg.fit(reg.X_train, reg.f_train, )
 
-        train_error[i] = np.mean( (z_tilde - reg.f_train)**2 )
-        test_error[i]  = np.mean( (z_pred  - reg.f_test )**2 )
+            z_tilde = reg.X_train @ SDG.beta
+            z_kit = reg.X_train @ sgdreg.coef_
 
-plt.plot(degrees, train_error, label = 'train_error')
-plt.plot(degrees, test_error, label = 'test_error')
-plt.xlabel('deg')
-plt.ylabel('Error')
-plt.legend()
-plt.show()
+            error[i] = np.mean((z_tilde - reg.f_train)**2)
+            error_kit[i] = np.mean((z_kit - reg.f_train)**2)
+
+        plt.plot(np.log10(t0), error, label = "Deg: %i"%deg)
+        plt.plot(np.log10(t0), error_kit, label = "Kit Deg: %i"%deg)
+    plt.legend()
+    plt.show()
+    exit()
