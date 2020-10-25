@@ -29,18 +29,16 @@ class stochastic_descent:
 
         return X_new, y_new
 
-    def fit(self, X, y, batch_size, t0, t1, gamma, loss_func):
+    def fit(self, X, y, batch_size, t0, t1, gamma, epochs, loss_func):
+        # Fetch relevant parameters for minibatches
         n, feats = X.shape
         n_batch = int(n/batch_size)
-        n_epochs = 100
+        n_epochs = epochs
 
         # Setting up a starting point
         beta = np.random.randn(feats)
         learning_rate = t0/t1
         v = 1
-
-        errors = np.zeros(n_epochs)
-        epochs = np.linspace(1, n_epochs,n_epochs)
 
         # Break data into mini batches
         X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
@@ -48,70 +46,26 @@ class stochastic_descent:
         for epoch in range(1,n_epochs+1):
             # Perform Gradient Descent on minibatches
             for i in range(n_batch):
-                # Fetch random batch and calculate gradient
+                # Fetch random batch
                 batch_index = np.random.randint(n_batch)
                 Xi = X_batches[batch_index]
                 yi = y_batches[batch_index]
-                gradients = 2/n_batch * Xi.T @ (Xi @ beta - yi) # Derivated 1/n_batch * (Xi @ beta - yi)^2 with respect to beta
 
+                # Calculate gradients analytically and using autograd
+                analytic_gradients = 2/n_batch * Xi.T @ (Xi @ beta - yi)
                 gradient_func = grad(loss_func, 1)
-                gradients_ = gradient_func(Xi, beta, yi)
+                autograd_gradients = gradient_func(Xi, beta, yi)
 
                 # Calculate step length
                 t = epoch*n_batch + i
                 learning_rate = self.learning_schedule(t, t0, t1)
 
-                v = gamma*v + learning_rate*gradient_func(Xi, beta - gamma*v, yi)
-                #print(v)
+                # Calulate momentum and update beta
+                v = gamma*v + learning_rate * autograd_gradients
+                beta = beta - v
 
-                beta = beta - v#learning_rate*gradients_
 
-            #errors[epoch-1] = np.mean((X @ beta - y)**2)
-
-        #plt.plot(epochs, errors)
-        #plt.show()
-
-        #print(beta)
         # Store final set of coefficients and intercept
         self.beta = beta
         self.intercept_ = beta[0]
         self.coef_ = beta[1:]
-
-if __name__ == "__main__":
-    def MSE(X, beta, y):
-        return np.mean(( X @ beta - y)**2)
-    reg = Regression()
-    reg.dataset_franke(200)
-
-    batch_size = 32
-    t0 = np.logspace(-3,1,10)
-    gamma = 0.5
-
-    maxdeg = 2
-    degrees = np.linspace(1,maxdeg,maxdeg, dtype = 'int')
-
-    for deg in degrees:
-        error     = np.zeros(t0.shape)
-        error_kit = np.zeros(t0.shape)
-
-        for i, t in enumerate(t0):
-            reg.design_matrix(deg)
-            reg.split(reg.X, reg.f)
-
-            SDG = stochastic_descent()
-            SDG.fit(reg.X_train, reg.f_train, batch_size, t, 10, gamma, loss_func = MSE)
-
-            sgdreg = SGDRegressor(max_iter = 100, penalty=None, eta0=t/10)
-            sgdreg.fit(reg.X_train, reg.f_train, )
-
-            z_tilde = reg.X_train @ SDG.beta
-            z_kit = reg.X_train @ sgdreg.coef_
-
-            error[i] = np.mean((z_tilde - reg.f_train)**2)
-            error_kit[i] = np.mean((z_kit - reg.f_train)**2)
-
-        plt.plot(np.log10(t0), error, label = "Deg: %i"%deg)
-        plt.plot(np.log10(t0), error_kit, label = "Kit Deg: %i"%deg)
-    plt.legend()
-    plt.show()
-    exit()
