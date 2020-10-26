@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-import numpy as np
+import autograd.numpy as np
+from autograd import grad
 import matplotlib.pyplot as plt
 
 #seed
 np.random.seed(42)
 
 class FF_NeuralNetwork:
-    def __init__(self, input_values):
-      
+    def __init__(self, input_values,y):
+        self.y = y
         self.weights = []
         self.bias = []
         
@@ -41,7 +42,10 @@ class FF_NeuralNetwork:
     def sigmoid_deriv(self,x):
         return self.sigmoid(x) * (1-self.sigmoid(x))
     
-        
+    def MSE(X, beta, y):
+        return np.mean(( X @ beta - y)**2)
+    
+    
     def feed_forward(self, act_func):
         for i, weight in enumerate(self.weights):
             
@@ -55,44 +59,64 @@ class FF_NeuralNetwork:
             # print ('z',self.z[i].shape)
             self.activations.append(np.array(act_func(self.z[i])))
             # print ('active',self.activations[i+1].shape)
+            
+            # make a new activation fuction at the end
 
     def back_prpagation(self,act_func_deriv):
-        print ('acitive' , len(self.activations))
+        print ('acitive' , self.activations)
         print ('zzz', len(self.z))
         
-        for i in reversed(range(len(self.activations)-1)):
-            l=i+1
-            print ('i = ', i)
-            print (len(self.z))
+        #values for layer L (last layer)
+        dc_da = 2*(self.activations[-1]-self.y)
+        da_dz = act_func_deriv(self.z[-1])
+        print ('dc_da', dc_da)
+        print ('da_dz', da_dz)
+        delta = dc_da * da_dz
+        
+        for l in reversed(range(len(self.activations)-1)):
+            #l=L-1 for last layer
+            
+            # no z or weights value for the first layer so we have to use index [l-1]
+
+            print ('l = ', l)
+            print ('len z' , len(self.z))
+            print ('len weights', len(self.weights))
+            
+            # calculatin derivatives.
+            
             # no z value for the first layer so we have to use index [l-1]
             da_dz = act_func_deriv(self.z[l-1])
-            #maybe wron index
+            
+            #maybe wrong index
             dz_dw = self.activations[l]
+            print ('activations ', self.activations[l])
+            
+            print ('...........................................')
+            print ('\n delta \n', delta )
+            print ('\n weights \n', self.weights[l])
+            print ('\n act_func_deriv \n', act_func_deriv(self.z[l-1]).shape)
+            print ('res', self.weights[l] @ self.z[l-1])
+            print ('...........................................')
             
             
-            dc_da = 'autograd'
+            delta = delta @ self.weights[l] @ act_func_deriv(self.z[l-1])
 
-        # # want to find dc_dw    
-        # dc_dw = dc_da*da_dz*dz_dw
-        # #dc_db
-        # dc_db = da_dz*dc_da
-        
-        
-        # delta = da_dz * dc_da
-        
-    
-        # #updating weights
-        # weights = weights -lr*dc_dw
-        # #updating bias
-        # for element in deriv:
-        #     bias -= lr*dc_db
+            
+            # dc_dw = delta*dz_dw
+            # dc_db = delta *1 
+
+            # #updating weights
+            # weights = weights -lr*dc_dw
+            # #updating bias
+            # for element in deriv:
+            #     bias -= lr*dc_db
                 
         
         return 
 
         
 arch = [2,4,4,2]
-FFNN = FF_NeuralNetwork([1,0])
+FFNN = FF_NeuralNetwork([1,0], [1,1])
 FFNN.create_layers(arch)
 FFNN.feed_forward(FFNN.sigmoid)
 FFNN.back_prpagation(FFNN.sigmoid_deriv)
