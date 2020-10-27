@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
+"""
+Created on Mon Oct 26 17:56:43 2020
+
+@author: ingunn
+"""
+
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
 import autograd.numpy as np
 from autograd import grad
 import matplotlib.pyplot as plt
@@ -9,6 +17,7 @@ np.random.seed(42)
 
 class FF_NeuralNetwork:
     def __init__(self, input_values,y):
+        self.input_values = input_values
         self.y = y
         self.weights = []
         self.bias = []
@@ -19,9 +28,16 @@ class FF_NeuralNetwork:
         self.z = []
         
         self.activations = []
-        self.activations.append(np.array(input_values))
+        self.activations.append(np.array(self.input_values)) # ? 
     
-    def create_layers(self, architecture):
+    def create_layers(self, nodes_hidden ,layers_hidden, nodes_output):
+
+        architecture = []
+        architecture.append(len(self.input_values))
+        for i in range(layers_hidden):
+            architecture.append(nodes_hidden)
+        architecture.append(nodes_output)
+        
         for i, size in enumerate(architecture):
             lst = []
             bias = []
@@ -33,8 +49,8 @@ class FF_NeuralNetwork:
             
         self.weights= self.weights[1:]
         self.bias = self.bias[1:]
+        
 
-    
     
     def sigmoid(self,x):
         return 1/(1+np.exp(-x))
@@ -63,45 +79,55 @@ class FF_NeuralNetwork:
             # make a new activation fuction at the end
 
     def back_prpagation(self,act_func_deriv):
-        print ('acitive' , self.activations)
-        print ('zzz', len(self.z))
+        errror[-1] = self.activations[-1] -y
         
-        #values for layer L (last layer)
-        dc_da = 2*(self.activations[-1]-self.y)
-        da_dz = act_func_deriv(self.z[-1])
-        print ('dc_da', dc_da)
-        print ('da_dz', da_dz)
-        delta = dc_da * da_dz
+        weights_gradient[-1] = self.activations[-1].T @ error[-1]
+        bias gradient[-1] = np.sum(error[-1],axis = 0)
+        
+        # print ('acitive' , self.activations)
+        # print ('zzz', len(self.z))
+        
+        # #values for layer L (last layer)
+        # dc_da = 2*(self.activations[-1]-self.y)
+        # da_dz = act_func_deriv(self.z[-1])
+        # print ('dc_da', dc_da)
+        # print ('da_dz', da_dz)
+        # delta = dc_da * da_dz
+        # weight_gradient[-1] = self.activations[-1].T @
         
         for l in reversed(range(len(self.activations)-1)):
             #l=L-1 for last layer
             
-            # no z or weights value for the first layer so we have to use index [l-1]
+        error[l] = (error[l+1] @ self.weights[l].T ) *self.activations[l-1] * (1-self.activations[l-1])
+        weights_gradient[l] = ?
+        bias_gradienet[l] =  np.sum(error[l], axis = 0)
+        
+        #     # no z or weights value for the first layer so we have to use index [l-1]
 
-            print ('l = ', l)
-            print ('len z' , len(self.z))
-            print ('len weights', len(self.weights))
+        #     print ('l = ', l)
+        #     print ('len z' , len(self.z))
+        #     print ('len weights', len(self.weights))
             
-            # calculatin derivatives.
+        #     # calculatin derivatives.
             
-            # no z value for the first layer so we have to use index [l-1]
-            da_dz = act_func_deriv(self.z[l-1])
+        #     # no z value for the first layer so we have to use index [l-1]
+        #     da_dz = act_func_deriv(self.z[l-1])
             
-            #maybe wrong index
-            dz_dw = self.activations[l]
-            print ('activations ', self.activations[l])
+        #     #maybe wrong index
+        #     dz_dw = self.activations[l]
+        #     print ('activations ', self.activations[l])
             
-            print ('...........................................')
-            print ('\n delta \n', delta )
-            print ('\n weights \n', self.weights[l])
-            print ('\n act_func_deriv \n', act_func_deriv(self.z[l-1]).shape)
-            print ('res', self.weights[l] @ self.z[l-1])
-            print ('...........................................')
+        #     print ('...........................................')
+        #     print ('\n delta \n', delta )
+        #     print ('\n weights \n', self.weights[l])
+        #     print ('\n act_func_deriv \n', act_func_deriv(self.z[l-1]).shape)
+        #     print ('res', self.weights[l] @ self.z[l-1])
+        #     print ('...........................................')
             
             
-            delta = delta @ self.weights[l] @ act_func_deriv(self.z[l-1])
+        #     delta = delta @ self.weights[l] @ act_func_deriv(self.z[l-1])
 
-            
+        #     weights_gradient = self.activations[l]
             # dc_dw = delta*dz_dw
             # dc_db = delta *1 
 
@@ -110,14 +136,17 @@ class FF_NeuralNetwork:
             # #updating bias
             # for element in deriv:
             #     bias -= lr*dc_db
-                
-        
+    #regularization
+    
+    #for i in range(1000)
+    weights -=  lr*weights_gradient
+    bias -= lr*bias_gradient
         return 
 
         
-arch = [2,4,4,2]
+
 FFNN = FF_NeuralNetwork([1,0], [1,1])
-FFNN.create_layers(arch)
+FFNN.create_layers(4,5,1)
 FFNN.feed_forward(FFNN.sigmoid)
 FFNN.back_prpagation(FFNN.sigmoid_deriv)
 # for val in FFNN.weights:
