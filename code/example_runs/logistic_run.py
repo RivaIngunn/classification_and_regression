@@ -51,22 +51,22 @@ print(pred2[:20])
 print(y_test[:20])
 """
 def softmax(z):
-    output = np.zeros_like(O)
-    for i in range(z.shape[0]):
-        top = np.exp(z[i])
-        bottom = np.sum(top)
-        output[i] = top/bottom
-    return output
+    top = np.exp(z)
+    bottom = 1 / np.sum(top)
+    return top * bottom
 
 n_dat = x_train.shape[0]
 feats = x_train.shape[1]
 n_class = 10
 w = np.random.rand(feats,n_class)
 O = x_train @ w
-model = softmax(O)
-print(np.max(model))
-print(model.shape)
-print(y_train.shape)
+model = np.zeros_like(O)
+for i in range(len(model)):
+    model[i] = softmax(O[i])
+print(np.sum(model[0]))
+#print(np.max(model))
+#print(model.shape)
+#print(y_train.shape)
 def cross_entropy(target, model):
     return -(np.log(model) @ target)
 

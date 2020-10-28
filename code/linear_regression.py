@@ -146,8 +146,8 @@ class Regression():
 
         # Scaling Data
         if scale:
-            self.X_train = self.scale(self.X_train)
-            self.X_test  = self.scale(self.X_test)
+            self.X_train = self.scale(self.X_train[:,1:])
+            self.X_test  = self.scale(self.X_test[:,1:])
             self.f_train = self.scale(self.f_train)
             self.f_test  = self.scale(self.f_test)
 
