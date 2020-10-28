@@ -3,8 +3,10 @@
 import autograd.numpy as np
 from autograd import grad
 import matplotlib.pyplot as plt
-from sklearn.neural_network import MLPClassifier
+from sklearn.neural_network import MLPClassifier, MLPRegressor
 import seaborn as sns
+from linear_regression import Regression
+from sklearn.metrics import accuracy_score, mean_squared_error
         
 import sklearn
 #seed
@@ -37,13 +39,13 @@ class FF_NeuralNetwork:
         architecture.append(nodes_output)
         
         for i, size in enumerate(architecture):
-            lst = []
+            weight = []
             bias = []
             for j in range(size):
-                lst.append(np.zeros(architecture[i-1]))
+                weight.append(np.zeros(architecture[i-1]))
                 bias.append(0)
-            self.weights.append(np.array(lst))
-            self.weights_gradient.append(np.zeros_like(lst))
+            self.weights.append(np.array(weight))
+            self.weights_gradient.append(np.zeros_like(weight))
             
             self.bias.append(np.array(bias))
             self.bias_gradient.append(np.zeros_like(bias))
@@ -51,6 +53,7 @@ class FF_NeuralNetwork:
             
         self.weights= self.weights[1:]
         self.bias = self.bias[1:]
+
         
 
     
@@ -77,7 +80,7 @@ class FF_NeuralNetwork:
             # print ('activations', np.array(self.activations[i]).shape)
             # print ('bias',self.bias[i].shape)
             
-            self.z.append(np.array(np.dot( weight, self.activations[i]) + self.bias[i]))
+            self.z.append(np.dot( weight, self.activations[i]) + self.bias[i])
             
             # print ('z',self.z[i].shape)
             self.activations.append(np.array(act_func(self.z[i])))
@@ -86,9 +89,23 @@ class FF_NeuralNetwork:
             # make a new activation fuction at the end
 
 
-    def NN_with_sklearn(self, learning_rate, lam_vals, ):
+    def NN_with_sklearn(self,X_train,X_test,y_train, y_test, learning_rate, lam_vals, hidden_nodes_inlayer, epochs):
+        
+        
+        DNN_scikit = np.zeros((len(learning_rate), len(lam_vals)), dtype=object)
 
-
+        for i, rate in enumerate(learning_rate):
+            for j, lam in enumerate(lam_vals):
+                dnn = MLPRegressor(hidden_layer_sizes=(hidden_nodes_inlayer), activation='logistic',
+                                    alpha=lam, learning_rate_init=rate, max_iter=epochs)
+                dnn.fit(X_train, y_train)
+                
+                DNN_scikit[i][j] = dnn
+                
+                # print("Learning rate  = ", rate)
+                # print("Lambda = ", lam)
+                # print("Accuracy score on test set: ", dnn.score(X_test, y_test))
+                # print()
         sns.set()
         
         train_accuracy = np.zeros((len(learning_rate), len(lam_vals)))
@@ -101,19 +118,19 @@ class FF_NeuralNetwork:
                 train_pred = dnn.predict(X_train) 
                 test_pred = dnn.predict(X_test)
         
-                train_accuracy[i][j] = accuracy_score(Y_train, train_pred)
-                test_accuracy[i][j] = accuracy_score(Y_test, test_pred)
+                train_accuracy[i][j] = mean_squared_error(y_train, train_pred)
+                test_accuracy[i][j] = mean_squared_error(y_test, test_pred)
         
                 
         fig, ax = plt.subplots(figsize = (10, 10))
-        sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+        sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="coolwarm")
         ax.set_title("Training Accuracy")
         ax.set_ylabel("$\eta$")
         ax.set_xlabel("$\lambda$")
         plt.show()
         
         fig, ax = plt.subplots(figsize = (10, 10))
-        sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+        sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="coolwarm")
         ax.set_title("Test Accuracy")
         ax.set_ylabel("$\eta$")
         ax.set_xlabel("$\lambda$")
@@ -125,55 +142,42 @@ class FF_NeuralNetwork:
 
         self.error[-1] = self.activations[-1] - self.y
         
-        print ("-------------------------")
-        print ('y',len(self.y))
-        print ('activ',len(self.activations))
-        print ('weight',len(self.weights))
-        print("---------")
-        print ('activ last',self.activations[-1].shape)
-        print ('weight last',self.weights[-1].shape)
-        print ('error', self.error[-1].shape)
-        print ("--------------------------")
+        # print ("-------------------------")
+        # print ('y',len(self.y))
+        # print ('activ',len(self.activations))
+        # print ('weight',len(self.weights))
+        # print("---------")
+        # print ('activ last',self.activations[-1].shape)
+        # print ('weight last',self.weights[-1].shape)
+        # print ('error', self.error[-1].shape)
+        # print ("--------------------------")
         
         
         self.weights_gradient[-1] = self.activations[-1].T @ self.error[-1]
         self.bias_gradient[-1] = np.sum(self.error[-1],axis = 0)
-        
-        
-        
-        
-        # print ('acitive' , self.activations)
-        # print ('zzz', len(self.z))
-        
-        # #values for layer L (last layer)
-        dc_da = 2*(self.activations[-1]-self.y)
-        da_dz = act_func_deriv(self.z[-1])
-        # print ('dc_da', dc_da)
-        # print ('da_dz', da_dz)
-        delta = dc_da * da_dz
-        # weight_gradient[-1] = self.activations[-1].T @
+
         
         for l in reversed(range(len(self.activations)-1)):
             #l=L-1 for last layer
             
-            print ('...........................................')
-            print ('l', l)
-            print ('zzzzzzzzzz', len(self.z))
-            print ('error[l+1]', self.error[l+1].shape)
-            print ('weights', self.weights[l].shape)
-            print ('activatoins[l-1]')
-            print ('activations', self.activations[l].shape)
-            print ('res', self.weights[l] @ self.z[l-1])
-            print ('...........................................')
+            # print ('...........................................')
+            # print ('l', l)
+            # print ('zzzzzzzzzz', len(self.z))
+            # print ('error[l+1]', self.error[l].shape)
+            # print ('weights', self.weights[l].T.shape)
+            # print ('activatoins[l-1]')
+            # print ('activations', self.activations[l].shape)
+            # print ('res', self.weights[l] @ self.z[l-1])
+            # print ('...........................................')
         
             
             #delta = np.sum(delta*self.weights[l] @ self.activations[self.z[l]])
             self.error[l] = (self.error[l+1] @ self.weights[l]) *self.activations[l] * (1-self.activations[l])
-            #weights_gradient[l] = ?
+            self.weights_gradient[l] =self.activations[l] @ self.error[l]
             self.bias_gradient[l] =  np.sum(self.error[l], axis = 0)
         
             # no z or weights value for the first layer so we have to use index [l-1]
-
+            # self.update_weight_bias()
  
     def update_weight_bias(self,n):
         for i in range(n):
@@ -182,17 +186,20 @@ class FF_NeuralNetwork:
 
 
 
-lr = []
-lamb = []
+lr = [0.1,0.01,0.001]
+lamb = np.logspace(-5,0,5)
 
 FFNN = FF_NeuralNetwork([1,0], [1,1])
 FFNN.create_layers(4,5,2)
 FFNN.feed_forward(FFNN.sigmoid)
 FFNN.back_prpagation(FFNN.sigmoid_deriv)
-FFNN.NN_with_sklearn()
-# for val in FFNN.weights:
-#     print (val)
-#print (FFNN.bias)
 
 
-# print (FFNN.weights[1])
+# reg = Regression()
+# reg.dataset_franke(4)
+# reg.design_matrix(6)
+# reg.split(reg.X, reg.f)
+
+# print (reg.X_train,reg.f_train )
+# FFNN.NN_with_sklearn(reg.X_train, reg.X_test, reg.f_train, reg.f_test, lr, lamb,5,1000)
+
