@@ -16,12 +16,13 @@ import matplotlib.pyplot as plt
 np.random.seed(42)
 
 class FF_NeuralNetwork:
-    def __init__(self, input_values,y):
+    def __init__(self, input_values,y, lam=0):
         self.input_values = input_values
         self.y = y
+        self.lam = lam
         self.weights = []
         self.bias = []
-        
+
         self.bias_gradient = []
         self.weights_gradient = []
         self.error = []
@@ -67,7 +68,13 @@ class FF_NeuralNetwork:
     def MSE(X, beta, y):
         return np.mean(( X @ beta - y)**2)
     
-    
+    def cost_func_regularized(func,x):
+        value = 0
+        for i in range(len(self.weights)):
+            sum_of_weights += np.sum(self.weights[i])
+            
+        return func(x) + self.lam* sum_of_weights
+        
     def feed_forward(self, act_func):
         for i, weight in enumerate(self.weights):
             
@@ -98,7 +105,6 @@ class FF_NeuralNetwork:
         print ('activ',len(self.activations))
         print ('weight',len(self.weights))
         print("---------")
-        
         print ('activ last',self.activations[-1].shape)
         print ('weight last',self.weights[-1].shape)
         print ('error', self.error[-1].shape)
@@ -141,41 +147,7 @@ class FF_NeuralNetwork:
             #weights_gradient[l] = ?
             self.bias_gradient[l] =  np.sum(self.error[l], axis = 0)
         
-        #     # no z or weights value for the first layer so we have to use index [l-1]
-
-        #     print ('l = ', l)
-        #     print ('len z' , len(self.z))
-        #     print ('len weights', len(self.weights))
-            
-        #     # calculatin derivatives.
-            
-        #     # no z value for the first layer so we have to use index [l-1]
-        #     da_dz = act_func_deriv(self.z[l-1])
-            
-        #     #maybe wrong index
-        #     dz_dw = self.activations[l]
-        #     print ('activations ', self.activations[l])
-            
-        #     print ('...........................................')
-        #     print ('\n delta \n', delta )
-        #     print ('\n weights \n', self.weights[l])
-        #     print ('\n act_func_deriv \n', act_func_deriv(self.z[l-1]).shape)
-        #     print ('res', self.weights[l] @ self.z[l-1])
-        #     print ('...........................................')
-            
-            
-        #     delta = delta @ self.weights[l] act_func_deriv(self.z[l-1])
-
-        #     weights_gradient = self.activations[l]
-            # dc_dw = delta*dz_dw
-            # dc_db = delta *1 
-
-            # #updating weights
-            # weights = weights -lr*dc_dw
-            # #updating bias
-            # for element in deriv:
-            #     bias -= lr*dc_db
-    #regularization
+            # no z or weights value for the first layer so we have to use index [l-1]
 
  
     def update_weight_bias(self,n):
