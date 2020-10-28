@@ -1,17 +1,12 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
-"""
-Created on Mon Oct 26 17:56:43 2020
-
-@author: ingunn
-"""
-
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
 import autograd.numpy as np
 from autograd import grad
 import matplotlib.pyplot as plt
-
+from sklearn.neural_network import MLPClassifier
+import seaborn as sns
+        
+import sklearn
 #seed
 np.random.seed(42)
 
@@ -82,7 +77,6 @@ class FF_NeuralNetwork:
             # print ('activations', np.array(self.activations[i]).shape)
             # print ('bias',self.bias[i].shape)
             
-            
             self.z.append(np.array(np.dot( weight, self.activations[i]) + self.bias[i]))
             
             # print ('z',self.z[i].shape)
@@ -91,13 +85,44 @@ class FF_NeuralNetwork:
             
             # make a new activation fuction at the end
 
+
+    def NN_with_sklearn(self, learning_rate, lam_vals, ):
+
+
+        sns.set()
+        
+        train_accuracy = np.zeros((len(learning_rate), len(lam_vals)))
+        test_accuracy = np.zeros((len(learning_rate), len(lam_vals)))
+        
+        for i in range(len(learning_rate)):
+            for j in range(len(lam_vals)):
+                dnn = DNN_scikit[i][j]
+                
+                train_pred = dnn.predict(X_train) 
+                test_pred = dnn.predict(X_test)
+        
+                train_accuracy[i][j] = accuracy_score(Y_train, train_pred)
+                test_accuracy[i][j] = accuracy_score(Y_test, test_pred)
+        
+                
+        fig, ax = plt.subplots(figsize = (10, 10))
+        sns.heatmap(train_accuracy, annot=True, ax=ax, cmap="viridis")
+        ax.set_title("Training Accuracy")
+        ax.set_ylabel("$\eta$")
+        ax.set_xlabel("$\lambda$")
+        plt.show()
+        
+        fig, ax = plt.subplots(figsize = (10, 10))
+        sns.heatmap(test_accuracy, annot=True, ax=ax, cmap="viridis")
+        ax.set_title("Test Accuracy")
+        ax.set_ylabel("$\eta$")
+        ax.set_xlabel("$\lambda$")
+        plt.show()
+
+       
+        
     def back_prpagation(self,act_func_deriv):
-        
-        
-        
-        
-        
-        
+
         self.error[-1] = self.activations[-1] - self.y
         
         print ("-------------------------")
@@ -155,10 +180,16 @@ class FF_NeuralNetwork:
             self.weights = self.learning_rate* self.weights_gradient
             self.bias = self.learning_rate* self.bias_gradient
 
+
+
+lr = []
+lamb = []
+
 FFNN = FF_NeuralNetwork([1,0], [1,1])
 FFNN.create_layers(4,5,2)
 FFNN.feed_forward(FFNN.sigmoid)
 FFNN.back_prpagation(FFNN.sigmoid_deriv)
+FFNN.NN_with_sklearn()
 # for val in FFNN.weights:
 #     print (val)
 #print (FFNN.bias)
