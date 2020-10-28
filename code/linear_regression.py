@@ -140,14 +140,20 @@ class Regression():
             None.
 
         """
-        # Scaling Data
-        if scale:
-            X[:,1:] = (X[:,1:] - np.mean(X[:,1:], axis=0))/np.std(X[:,1:], axis=0)
-            f = (f - np.mean(f))/np.std(f)
         # Splitting Data
         np.random.seed(42)
         self.X_train, self.X_test, self.f_train, self.f_test = train_test_split(X,f,test_size=0.2)
 
+        # Scaling Data
+        if scale:
+            self.X_train = self.scale(self.X_train)
+            self.X_test  = self.scale(self.X_test)
+            self.f_train = self.scale(self.f_train)
+            self.f_test  = self.scale(self.f_test)
+
+    def scale(self,t):
+        t = (t - np.mean(t, axis=0))/np.std(t, axis=0)
+        return t
 
     def MSE(self,y,y_pred):
         """

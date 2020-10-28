@@ -8,9 +8,9 @@ np.random.seed(45)
 
 class stochastic_descent:
     def __init__(self):
-        self.beta = None        # Complete set of coefficients with intercept
+        self.beta       = None  # Complete set of coefficients with intercept
         self.intercept_ = None  # Array of intercept
-        self.coef_ = None       # Coefficients without intercept
+        self.coef_      = None  # Coefficients without intercept
 
     def learning_schedule(self, t, t0, t1):
         return t0/(t+t1)
@@ -29,20 +29,23 @@ class stochastic_descent:
 
         return X_new, y_new
 
-    def fit(self, X, y, batch_size, t0, t1, gamma, epochs, loss_func):
+    def fit(self, X, y, batch_size, t0, t1, gamma, n_epochs, lam, loss_func, beta0=None):
         # Fetch relevant parameters for minibatches
         n, feats = X.shape
         n_batch = int(n/batch_size)
-        n_epochs = epochs
 
         # Setting up a starting point
-        beta = np.random.randn(feats)
+        if beta0 == None:
+            beta = np.random.randn(feats)
+        else:
+            beta = beta0
         learning_rate = t0/t1
         v = 1
 
         # Break data into mini batches
         X_batches, y_batches = self.create_mini_batches(X, y, n_batch)
-
+        intercepts = np.zeros(n_epochs)
+        epochs = np.linspace(1, n_epochs, n_epochs)
         for epoch in range(1,n_epochs+1):
             # Perform Gradient Descent on minibatches
             for i in range(n_batch):
@@ -52,16 +55,16 @@ class stochastic_descent:
                 yi = y_batches[batch_index]
 
                 # Calculate gradients analytically and using autograd
-                analytic_gradients = 2/n_batch * Xi.T @ (Xi @ beta - yi)
+                #gradients = 2/n_batch * Xi.T @ ((Xi @ beta) - yi)
                 gradient_func = grad(loss_func, 1)
-                autograd_gradients = gradient_func(Xi, beta, yi)
+                gradients = gradient_func(Xi, beta, yi, lam)
 
-                # Calculate step length
+                # Calculate learning rate
                 t = epoch*n_batch + i
                 learning_rate = self.learning_schedule(t, t0, t1)
 
                 # Calulate momentum and update beta
-                v = gamma*v + learning_rate * autograd_gradients
+                v = gamma*v + learning_rate * gradients
                 beta = beta - v
 
 
@@ -69,3 +72,5 @@ class stochastic_descent:
         self.beta = beta
         self.intercept_ = beta[0]
         self.coef_ = beta[1:]
+
+"""autopep"""
