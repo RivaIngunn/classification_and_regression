@@ -8,7 +8,7 @@ from sklearn.linear_model import LogisticRegression
 import sys
 sys.path.insert(0,"..")
 from linear_regression import Regression
-from stochastic_gradient_descent import stochastic_descent
+from stochastic_gradient_descent import StochasticDescent
 from logistic_regression import MultinomialRegression
 from load_mnist import LoadMNIST
 

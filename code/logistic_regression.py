@@ -1,5 +1,5 @@
 import autograd.numpy as np
-from stochastic_gradient_descent import stochastic_descent
+from stochastic_gradient_descent import StochasticDescent
 from sklearn import datasets
 from sklearn.model_selection import train_test_split
 
@@ -26,27 +26,9 @@ class MultinomialRegression:
 
     def fit(self):
         """ Use SGD to optimize weights """
-        data_indices = np.arange(self.datapoints)
-
-        # Perform stochastic gradient descent
-        for i in range(self.epochs):
-            for j in range(self.iterations):
-
-                # Select random area of input
-                chosen_datapoints = np.random.choice(
-                    data_indices, size=self.batch_size, replace=False
-                )
-                # Create minibatches
-                X_batch = self.X[chosen_datapoints]
-                y_batch = self.y[chosen_datapoints]
-
-                # Calculate gradient
-                z = X_batch @ self.weights
-                output = self.softmax(z)
-                gradient = self.cross_entropy_gradient(X_batch, y_batch, output)
-
-                # Update weights
-                self.weights -= self.eta * gradient
+        SGD = StochasticDescent(self.X, self.y, cost_func='cross entropy', theta0=self.weights)
+        SGD.fit_classifier(generate_theta=False)
+        self.weights = SGD.theta
 
     def predict(self, X):
         z = X @ self.weights

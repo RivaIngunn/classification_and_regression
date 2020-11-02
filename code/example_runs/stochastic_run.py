@@ -6,7 +6,7 @@ from sklearn.linear_model import SGDRegressor
 import sys
 sys.path.insert(0,"..")
 from linear_regression import Regression
-from stochastic_gradient_descent import stochastic_descent
+from stochastic_gradient_descent import StochasticDescent
 
 def R2_score(y, y_tilde):
     top = np.mean( (y - y_tilde)**2 )
@@ -117,5 +117,18 @@ def evaluate_mini_batches():
     plt.legend()
     plt.show()
 
-evaluate_learning_rate()
+reg = Regression()
+reg.dataset_franke(1000)
+deg = 8
+reg.design_matrix(deg)
+reg.split(reg.X, reg.f)
+
+SGD = StochasticDescent(reg.X_train, reg.f_train, cost_func='MSE', t0=1, schedule='adaptive')
+SGD.fit_regression()
+beta = SGD.theta
+
+plt.plot(reg.X_test @ beta)
+plt.plot(reg.f_test)
+plt.show()
+#evaluate_learning_rate()
 #evaluate_mini_batches()
