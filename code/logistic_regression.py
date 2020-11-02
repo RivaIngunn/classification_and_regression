@@ -24,12 +24,6 @@ class MultinomialRegression:
         # Initiate weights
         self.weights = np.random.randn(self.feats, self.n_classes)
 
-    def calculate_step(self, X):
-        z = X @ self.weights
-        output = self.softmax(z)
-        gradient = self.cross_entropy_gradient(X_batch, y_batch, output)
-        return gradient
-
     def fit(self):
         """ Use SGD to optimize weights """
         data_indices = np.arange(self.datapoints)
