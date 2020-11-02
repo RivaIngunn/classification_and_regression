@@ -9,65 +9,34 @@ import sys
 sys.path.insert(0,"..")
 from linear_regression import Regression
 from stochastic_gradient_descent import stochastic_descent
-from logistic_regression import LogisticRegressionOwn
+from logistic_regression import MultinomialRegression
+from load_mnist import LoadMNIST
 
 # Load MNIST dataset
-digits = datasets.load_digits()
-inputs = digits.data
-labels = digits.target
-print (inputs.shape)
+dat = LoadMNIST()
 
-# Plot first 5 numbers with their labels
-plt.figure(figsize=(20,4))
-for index, (image, label) in enumerate(zip(inputs[0:5], labels[0:5])):
-    plt.subplot(1, 5, index + 1)
-    plt.imshow(np.reshape(image, (8,8)), cmap=plt.cm.gray)
-    plt.title('Training: %i\n' % label, fontsize = 20)
-plt.show()
-
-# Split into training and test data
-x_train, x_test, y_train, y_test = train_test_split(inputs, labels, test_size=0.2, random_state=0)
-"""
-# Logistic regression
+# Logistic regression using sklearn
 logreg = LogisticRegression()
-logreg.fit(x_train, y_train)
-pred = logreg.predict(x_test)
+logreg.fit(dat.x_train, dat.y_train)
+pred = logreg.predict(dat.x_test)
 
 # Checking accuracy
-score = logreg.score(x_test, y_test)
+score = logreg.score(dat.x_test, dat.y_test)
 print(score)
 
+# Using our own logistic regression
+batch_size = 2**6
+epochs = 100
+iterations = 50
+eta = 1.0
+lam = 0.1
 
-print("Running own logistich regression!")
-logreg2 = LogisticRegressionOwn()
+mulreg = MultinomialRegression(dat.x_train, dat.y_train, eta, batch_size, epochs, iterations, lam)
+mulreg.fit()
+pred2 = mulreg.predict(dat.x_test)
 
-logreg2.fit(x_train, y_train, 0)
-print(x_train.shape)
-print(y_train.shape)
+X = pred2
+y = dat.y_test
+score2 = mulreg.accuracy_score(pred2, dat.y_test)
 
-pred2 = logreg2.predict(x_test)
-print(logreg2.beta.shape)
-print(pred2[:20])
-print(y_test[:20])
-"""
-def softmax(z):
-    top = np.exp(z)
-    bottom = 1 / np.sum(top)
-    return top * bottom
-
-n_dat = x_train.shape[0]
-feats = x_train.shape[1]
-n_class = 10
-w = np.random.rand(feats,n_class)
-O = x_train @ w
-model = np.zeros_like(O)
-for i in range(len(model)):
-    model[i] = softmax(O[i])
-print(np.sum(model[0]))
-#print(np.max(model))
-#print(model.shape)
-#print(y_train.shape)
-def cross_entropy(target, model):
-    return -(np.log(model) @ target)
-
-print(cross_entropy(y_train, softmax(O)))
+print(score2)
