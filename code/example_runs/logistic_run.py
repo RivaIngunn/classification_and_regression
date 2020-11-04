@@ -39,4 +39,6 @@ X = pred2
 y = dat.y_test
 score2 = mulreg.accuracy_score(pred2, dat.y_test)
 
+print(dat.y_test[:30])
+print(pred2[:30])
 print(score2)
