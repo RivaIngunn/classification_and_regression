@@ -368,13 +368,6 @@ def comparison():
     plt.legend()
     plt.show()
 
-
-
-
-
-
-
-
 #evaluate_learning_rate_new()
 #evaluate_batches_new()
 #evaluate_mini_batches()
