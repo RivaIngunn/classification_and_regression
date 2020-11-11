@@ -28,10 +28,10 @@ print(score)
 batch_size = 2**6
 epochs = 100
 iterations = 50
-eta = 1.0
+eta = 0.01
 lam = 0.1
 
-mulreg = MultinomialRegression(dat.x_train, dat.y_train, eta, batch_size, epochs, iterations, lam)
+mulreg = MultinomialRegression(dat.x_train, dat.y_train, batch_size=batch_size, epochs=epochs, t0=eta, lam=lam)
 mulreg.fit()
 pred2 = mulreg.predict(dat.x_test)
 
