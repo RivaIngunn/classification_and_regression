@@ -40,8 +40,8 @@ Find best set of hyperparameters for the Feed Forward Neural Network.
 Both for classification and linear regression.
 
 ### Test of codes
-to test the function write
+to test the methods write
 ```
 pytest -v
 ```
-or run the program normally. this also serves as benchmarks to check that each part of the code is running as expected.
+ while in code/tests or run the program normally. this also serves as benchmarks to check that each part of the code is running as expected.
