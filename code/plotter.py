@@ -3,6 +3,7 @@ import seaborn as sb
 class plotter:
 
     def single_plot_show(self, label_x, label_y, title, save = False, filename = None):
+        """ Plot and save in desired style """
         plt.style.use('seaborn-whitegrid')
         plt.title(title, fontsize='16')
         plt.xlabel(label_x, fontsize='16')

@@ -65,7 +65,7 @@ class StochasticDescent:
         self.fetch_funcs(cost_func, schedule)
 
         # Set seed
-        np.random.seed(42)
+        #np.random.seed(42)
 
     def fit_regression(self, generate_theta=True):
         """
@@ -91,7 +91,6 @@ class StochasticDescent:
         X_batches, y_batches = self.create_mini_batches()
         epochs = np.linspace(1,self.n_epochs, self.n_epochs)
         self.errors = np.zeros(len(epochs))
-        self.theta_array = np.zeros(len(epochs))
 
         for epoch in range(1,self.n_epochs+1):
             for i in range(self.n_batch):
@@ -113,11 +112,7 @@ class StochasticDescent:
                 v = self.gamma*v + learning_rate * gradients
                 self.theta = self.theta - v
 
-            #self.theta_array[epoch-1] = self.theta
             self.errors[epoch-1] = np.mean( (self.y-self.X@self.theta)**2 )
-        #plt.plot(epochs, self.errors)
-        #plt.show()
-
 
     def fit_classifier(self, generate_theta=True):
         """

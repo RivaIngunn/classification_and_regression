@@ -1,0 +1,49 @@
+---- Random search: 2 iterations ----
+Accuracy score: 0.933333
+Learning rate: 4.642e-02
+Batch size: 32
+Gamma: 0.110
+Penalty: 5.995e-04
+
+---- Random search: 2 iterations ----
+Accuracy score: 0.075000
+Learning rate: 1.000e+00
+Batch size: 16
+Gamma: 0.990
+Penalty: 7.743e-05
+
+---- Random search: 2 iterations ----
+Accuracy score: 0.075000
+Learning rate: 1.000e-02
+Batch size: 4
+Gamma: 0.990
+Penalty: 1.292e-02
+
+---- Random search: 100 iterations ----
+Accuracy score: 0.969444
+Learning rate: 4.642e-01
+Batch size: 16
+Gamma: 0.440
+Penalty: 7.743e-05
+
+---- Random search: 100 iterations ----
+Accuracy score: 0.966667
+Learning rate: 2.154e-01
+Batch size: 32
+Gamma: 0.440
+Penalty: 1.292e-02
+
+---- Random search: 100 iterations ----
+Accuracy score: 0.969444
+Learning rate: 4.642e+00
+Batch size: 4
+Gamma: 0.660
+Penalty: 2.783e-05
+
+---- Random search: 100 iterations ----
+Accuracy score: 0.963889
+Learning rate: 4.642e+00
+Batch size: 4
+Gamma: 0.000
+Penalty: 2.154e-04
+
