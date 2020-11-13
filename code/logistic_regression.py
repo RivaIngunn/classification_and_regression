@@ -1,44 +1,55 @@
 import autograd.numpy as np
-from autograd import grad
-import matplotlib.pyplot as plt
-from linear_regression import Regression
-from sklearn.linear_model import SGDClassifier
-from stochastic_gradient_descent import stochastic_descent
+from stochastic_gradient_descent import StochasticDescent
+from sklearn import datasets
+from sklearn.model_selection import train_test_split
 
-class LogisticRegressionOwn:
-    def __init__(self):
-        self.beta       = None  # Complete set of coefficients with intercept
-        self.intercept_ = None  # Array of intercept
-        self.coef_      = None  # Coefficients without intercept
+class MultinomialRegression:
+    """ Multinomial regression for classification """
+    def __init__(self, X, y, eta, batch_size, epochs, iterations, lam):
+        self.X = X # input
+        self.y = self.to_categorical_numpy(y) # target in one-hot form
 
-    def softmax(self, z):
-        return 1 / (1 - np.exp(-z))
+        # Define all sizes
+        self.datapoints  = X.shape[0]      # number of datapoints
+        self.feats       = X.shape[1]      # number of features
+        self.n_classes   = self.y.shape[1] # number of classes
 
-    def cross_entropy(self, X, beta, y, lam):
-        term1 = y * (X @ beta)
-        term2 = np.log(1 + np.exp( X @ beta ))
-        return - np.sum( term1 - term2 )
+        # Define parameters for gradient descent
+        self.eta        = eta        # learning rate
+        self.batch_size = batch_size # size of minibatches
+        self.epochs     = epochs     # number of epochs
+        self.iterations = iterations # number of iterations per epoch
+        self.lam        = lam        # l2 norm
 
-    def fit(self, X, y, lam):
-        t0 = 1e-3
-        t1 = 10
-        gamma = 0
-        batch_size = 5
-        epochs = 100
+        # Initiate weights
+        self.weights = np.random.randn(self.feats, self.n_classes)
 
-        # Using our own SGD method for fit
-        SGD = stochastic_descent()
-        SGD.fit(X, y, batch_size, t0, t1,
-        gamma, epochs, lam, self.cross_entropy)
-
-        # Using sklearn's SGD method for comparison
-        sgdkit = SGDClassifier(loss='perceptron')
-        sgdkit.fit(X, y)
-
-        self.beta       = SGD.beta
-        self.coef_      = sgdkit.coef_
-        self.intercept_ = sgdkit.intercept_
+    def fit(self):
+        """ Use SGD to optimize weights """
+        SGD = StochasticDescent(self.X, self.y, cost_func='cross entropy', theta0=self.weights)
+        SGD.fit_classifier(generate_theta=False)
+        self.weights = SGD.theta
 
     def predict(self, X):
-        print(np.mean(X @ self.beta))
-        return self.sigmoid(X @ self.beta)
+        z = X @ self.weights
+        output = self.softmax(z)
+        return np.argmax(output, axis=1)
+
+    def accuracy_score(self, model, target):
+        I = np.where(model == target)[0]
+        return len(I) / len(target)
+
+    def softmax(self, t):
+        exponent = np.exp(t)
+        return exponent/np.sum(exponent, axis=1, keepdims=True)
+
+    def cross_entropy_gradient(self, X, y, O):
+        return -(X.T @ (y - O) - self.lam*self.weights)/ self.datapoints
+
+    def to_categorical_numpy(self, integer_vector):
+        n_inputs = len(integer_vector)
+        n_categories = np.max(integer_vector) + 1
+        onehot_vector = np.zeros((n_inputs, n_categories))
+        onehot_vector[range(n_inputs), integer_vector] = 1
+
+        return onehot_vector
