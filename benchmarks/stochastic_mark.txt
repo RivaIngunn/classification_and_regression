@@ -1,0 +1,28 @@
+
+---- Random search: 100 iterations ----
+R2 score: 0.826580
+Learning rate: 1.000e-02
+Batch size: 64
+Gamma: 0.550
+Penalty: 5.995e-04
+
+---- Random search: 100 iterations ----
+R2 score: 0.824255
+Learning rate: 1.000e+00
+Batch size: 4
+Gamma: 0.110
+Penalty: 1.000e-05
+
+---- Random search: 100 iterations ----
+R2 score: 0.786830
+Learning rate: 1.000e-01
+Batch size: 16
+Gamma: 0.110
+Penalty: 2.154e-04
+
+---- Random search: 100 iterations ----
+R2 score: 0.810136
+Learning rate: 2.154e-02
+Batch size: 32
+Gamma: 0.000
+Penalty: 1.000e-05
