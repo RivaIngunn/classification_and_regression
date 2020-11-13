@@ -6,11 +6,9 @@ sys.path.insert(0,"..")
 from linear_regression import Regression
 from neural_network import FFNN
 from load_mnist import LoadMNIST
-import tensorflow as tf
 from sklearn.model_selection import RandomizedSearchCV
 from sklearn.neural_network import MLPRegressor, MLPClassifier
 import seaborn as sns
-from pprint import pprint
 import random
 # from sklearn.metrics import accuracy_score
 random.seed(1979)
