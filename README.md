@@ -37,7 +37,11 @@ Find best set of hyperparameters for logistic regression
 
 ### neural_network_run:
 Find best set of hyperparameters for the Feed Forward Neural Network.
-Both for classification and linear regression.
+for classification and comparing with sklearn and OLS.
+
+### neural_network_regression:
+Find best set of hyperparameters for the Feed Forward Neural Network.
+for regression and comparing with sklearn.
 
 ### Test of codes
 to test the methods write
