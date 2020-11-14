@@ -115,14 +115,14 @@ def compare():
     for i in range(5):
         neunet = FFNN(x_train, y_train, 2, 100, cost_func='cross-entropy', hidden_func='leaky-relu' , output_func='softmax',
         batch_size=32, eta=0.036, lam=0.013)
-        neunet.train(epoch = 300)
+        neunet.train(epoch = 600)
         model = neunet.predict(dat.x_test, classify=True)
         I = np.where(model == dat.y_test)[0]
         accuracy = len(I) / len(dat.y_test)
         NNscore.append(accuracy)
         print('accuracy NN', accuracy)
     
-        dnn = MLPClassifier(alpha=0.013, learning_rate_init=0.036, max_iter = 300)
+        dnn = MLPClassifier(alpha=0.013, learning_rate_init=0.036, max_iter = 600)
         dnn.fit(x_train, dat.y_train)
         score = dnn.score(x_test, dat.y_test)
         sk_score.append(score)
@@ -134,7 +134,7 @@ def compare():
     print ('sk mean', np.mean(sk_score))
     print ('std sk' ,np.std(sk_score))
     
-    
+
 dat = LoadMNIST()
 
 y_train = to_categorical_numpy(dat.y_train)
@@ -142,4 +142,11 @@ x_train = dat.x_train
 y_test = to_categorical_numpy(dat.y_test)
 x_test = dat.x_test
 
+#compare with sklearn
 compare()
+
+#find best value with random search
+# find_best_value()
+
+#plots a heatmap of MSE against learning rate and lambda
+# plot_heatmap()
